@@ -58,10 +58,12 @@ def add_new_card(data: dict) -> Dict or bool:
     return db_manager.commit_and_return_id(card)
 
 
-def update_card(card_id: int, column_id: int) -> bool:
+def update_card(card_id: int, data: int) -> bool:
     card = Cards.query.filter_by(id=card_id).first()
-    print(column_id['column_id'])
-    card['column_id'] = int(column_id['column_id'])
+    if data['column_id'] != card.column_id:
+        card.column_id = int(data['column_id'])
+    elif card.index != int(data['index']):
+        card.column_id = int(data['index'])
     return db_manager.commit_to_database(card)
 
 
