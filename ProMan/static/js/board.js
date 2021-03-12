@@ -195,9 +195,10 @@ class Cards {
 			const name = target.value
 
 			if (name !== '') {
-				const newCard = dom.initNewCard(target.value)
-				cardBody.appendChild(newCard)
 				const cardIndex = Array.prototype.indexOf.call(cardBody.children, newCard)
+				const newCard = dom.initNewCard(target.value, cardIndex)
+				cardBody.appendChild(newCard)
+
 				target.value = ''
 				easyHandler._postJson('POST', '/api/card', {
 					'name': name, 'owner_id': userID, 'board_id': this.boardId, 'column_id': columnId, 'index': cardIndex,
@@ -244,9 +245,11 @@ class Cards {
 
 		this.insertCards(columns)
 
+
 	}
 
 	insertCards(columns) {
+
 		const allColumnsBody = document.querySelectorAll('.cardBody')
 		columns.forEach(column => {
 			easyHandler._getData(`/api/cards/${column.id}`, (cardsData) => {
@@ -258,6 +261,7 @@ class Cards {
 						if (card.column_id === columnBodyId) {
 							body.appendChild(newCard)
 						}
+						checkIndexes()
 					})
 				})
 			})

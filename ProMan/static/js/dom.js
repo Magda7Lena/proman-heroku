@@ -30,7 +30,7 @@ export class Dom {
     	</div><!-- end of column  -->`
 	}
 
-	initNewCard(value) {
+	initNewCard(value, cardIdex) {
 		const newCard = document.createElement('div');
 		newCard.className = ('cardItem rounded-3 list-group-item list-group-item-action d-flex justify-content-between mb-1');
 		newCard.setAttribute('edit', 'true');
