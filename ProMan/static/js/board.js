@@ -203,7 +203,29 @@ class Cards {
 			new Sortable(card, {
 				group: 'shared', animation: 150, ghostClass: 'bg-warning'
 			});
-			card.addEventListener('dragend', this.moveCardUpdateIndex);
+
+			card.addEventListener('dragend', (event) => {
+				event.preventDefault()
+				checkIndexes()
+				let parentDiv = event.path[2]
+				let columnId = parentDiv.getAttribute('id')
+				let target = event.target
+				let cardId = target.getAttribute('id')
+				const path = window.location.pathname;
+				easyHandler._postJson('POST', `/api/update-card/${cardId}`, {
+					'column_id': columnId
+				}, (response) => {
+					if (response === true) {
+						document.location.href = path;
+					} else {
+						document.location.href = path;
+						alert('Failed')
+					}
+				})
+			})
+
+// 			card.addEventListener('dragend', this.moveCardUpdateIndex);
+
 		})
 
 		new Sortable(this.allColumnsContainer, {
@@ -261,15 +283,23 @@ class Cards {
 			const name = target.value;
 
 			if (name !== '') {
-				const newCard = dom.initNewCard(target.value);
-				columnBody.appendChild(newCard);
-				const cardIndex = Array.prototype.indexOf.call(columnBody.children, newCard);
+
+				const cardIndex = Array.prototype.indexOf.call(cardBody.children, newCard)
+				const newCard = dom.initNewCard(target.value, cardIndex)
+				cardBody.appendChild(newCard)
+
+
+// 				const newCard = dom.initNewCard(target.value);
+// 				columnBody.appendChild(newCard);
+// 				const cardIndex = Array.prototype.indexOf.call(columnBody.children, newCard);
+
 				target.value = ''
 				easyHandler._postJson('POST', '/api/card', {
 					'name': name, 'owner_id': this.userId, 'board_id': this.boardId, 'column_id': columnId, 'index': cardIndex,
 				}, (response) => {
 					if (response.id) {
 						newCard.setAttribute('id', response.id);
+
 					} else {
 						alert('Failed');
 					}
@@ -295,10 +325,16 @@ class Cards {
 		})
 		this.insertCards(columns);
 
+
 	}
 
 	insertCards(columns) {
-		const allColumnsBody = document.querySelectorAll('.columnBody');
+
+
+		const allColumnsBody = document.querySelectorAll('.cardBody')
+
+// 		const allColumnsBody = document.querySelectorAll('.columnBody');
+
 		columns.forEach(column => {
 			easyHandler._getData(`/api/cards/${column.id}`, (cardsData) => {
 				cardsData.forEach(card => {
@@ -309,6 +345,7 @@ class Cards {
 						if (card.column_id === columnBodyId) {
 							body.appendChild(newCard);
 						}
+						checkIndexes()
 					})
 				})
 			})
@@ -340,7 +377,40 @@ class Cards {
 		})
 	}
 
+
+
 }
+
+
+// const dom = new Dom()
+// export const cards = new Cards();
+// cards.init()
+
+
+function checkIndexes(){
+		let columns = document.getElementsByClassName('col-md-auto rounded-3 p-1 alert-dark hover-shadow me-3 mb-3')
+		for(let i = 0; i < columns.length; i++){
+			let cardBody = columns[i].childNodes[4]
+			console.log(cardBody)
+			let cards = cardBody.getElementsByClassName('cardItem rounded-3 list-group-item list-group-item-action d-flex justify-content-between mb-1')
+			console.log(cards)
+			for(let j = 0; j < cards.length; j++){
+				cards[j].setAttribute('index',j)
+				let cardId = cards[j].getAttribute('id')
+				easyHandler._postJson('POST', `/api/update-card/${cardId}`, {
+					'index': j
+				}, (response) => {
+					console.log(response)
+					// if (response === true) {
+					// 	document.location.href = path;
+					// } else {
+					// 	document.location.href = path;
+					// 	alert('Failed')
+					// }
+				})
+			}
+		}
+	}
 
 export const cards = new Cards(userID);
 cards.init();

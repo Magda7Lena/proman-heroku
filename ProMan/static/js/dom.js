@@ -46,7 +46,7 @@ export class Dom {
 		return column
 	}
 
-	initNewCard(value) {
+	initNewCard(value, cardIdex) {
 		const newCard = document.createElement('div');
 		newCard.className = 'edit cardItem rounded-3 list-group-item list-group-item-action d-flex justify-content-between mb-1';
 		newCard.innerText = value;
