@@ -16,9 +16,17 @@ def get_board_by_id(board_id: int) -> int or None:
         print(e)
 
 
+def get_board_name_by_id(board_id: int) -> int or None:
+    try:
+        board_name = Boards.query.filter_by(id=board_id).with_entities(Boards.name).first()
+        return board_name
+    except Exception as e:
+        print(e)
+
+
 def get_columns(board_id: int) -> List[Dict]:
     try:
-        columns = Columns.query.filter_by(board_id=board_id).all()
+        columns = Columns.query.filter_by(board_id=board_id).order_by(Columns.index.asc()).all()
         dump_cols = column_schema.dump(columns)
         return dump_cols
     except Exception as e:
@@ -38,10 +46,22 @@ def delete_column(column_id: int) -> bool:
     return db_manager.update_to_database()
 
 
-def get_cards(column_id: int):
+def update_column_index(column_id: int, data:dict) -> bool:
+    column = Columns.query.filter_by(id=column_id).first()
+    column.index = int(data['index'])
+    return db_manager.commit_to_database(column)
+
+
+def change_column_name(column_id: int, data) -> bool:
+    new_name = data['name']
+    column = Columns.query.filter_by(id=column_id).first()
+    column.name = new_name
+    return db_manager.update_to_database()
+
+
+def get_cards(column_id: int) -> Dict:
     try:
         cards = Cards.query.filter_by(column_id=column_id).order_by(Cards.index.asc()).all()
-        print(cards[0].column_id)
         dump_cards = card_schema.dump(cards)
         return dump_cards
     except Exception as e:
@@ -56,6 +76,7 @@ def add_new_card(data: dict) -> Dict or bool:
     index = data['index']
     card = Cards(name=name, owner_id=owner_id, board_id=board_id, column_id=column_id, index=index)
     return db_manager.commit_and_return_id(card)
+
 
 
 def update_card(card_id: int, data: int) -> bool:
